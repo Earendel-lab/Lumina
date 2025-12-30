@@ -27,7 +27,7 @@ The most important feature of **Lumina** is what it **does not** do:
 
 ## 🚀 How to Use
 1. Clone the repository.
-2. Open `lumina.html` in any modern mobile browser (Chrome, Safari, or Edge).
+2. Open `index.html` in any modern mobile browser (Chrome, Safari, or Edge).
 3. Grant "Camera" permission when prompted (this is strictly for LED control).
 4. **Tip:** "Add to Home Screen" for a full-screen, native app feel.
 
