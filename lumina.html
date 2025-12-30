@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0C0D0F"> 
+    <title>Lumina</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&display=swap');
+
+        :root {
+            --bg: #0C0D0F;
+            --surface: #1C1B1F;
+            --primary: #D0BCFF;
+            --error: #F2B8B5;
+        }
+
+        /* Pure Full Screen Logic */
+        html, body {
+            height: 100%;
+            height: 100dvh;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: #E6E1E5;
+            font-family: 'Google Sans', sans-serif;
+            overflow: hidden;
+            position: fixed;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            /* Draws content behind the status bar and navigation bar */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* Top Header Area */
+        header {
+            padding-top: 10px;
+            text-align: center;
+        }
+
+        .privacy-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.06);
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #8E9199;
+        }
+
+        /* Perfectly Centered Body */
+        main {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            position: relative;
+        }
+
+        .view {
+            position: absolute;
+            inset: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .view.active { display: flex; animation: m3-entry 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+        @keyframes m3-entry {
+            from { opacity: 0; transform: scale(0.8) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* M3 Expressive Card */
+        .m3-card {
+            width: 240px;
+            height: 240px;
+            border-radius: 72px;
+            background: var(--surface);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+        }
+        .m3-card.active-main { background: var(--primary); border-radius: 120px; }
+        .m3-card.active-blink { background: var(--error); border-radius: 120px; box-shadow: 0 0 50px rgba(242,184,181,0.3); }
+
+        /* Tactile Slider */
+        .m3-slider {
+            width: 80%;
+            height: 76px;
+            background: var(--surface);
+            border-radius: 38px;
+            position: relative;
+            margin-top: 60px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fill {
+            position: absolute;
+            left: 0; height: 100%;
+            background: var(--error);
+            width: 0%;
+            pointer-events: none;
+            transition: width 0.1s linear;
+        }
+
+        .hint {
+            position: absolute;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: white;
+            mix-blend-mode: difference;
+            pointer-events: none;
+        }
+
+        input[type="range"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        /* Bottom Navigation */
+        nav {
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            background: #111114;
+        }
+        .tab { opacity: 0.3; flex: 1; text-align: center; transition: 0.3s; }
+        .tab.active { opacity: 1; }
+        .tab-pill { width: 64px; height: 32px; border-radius: 16px; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+        .tab.active .tab-pill { background: #332D41; color: var(--primary); }
+
+        /* Full Screen Overlay */
+        #screen-white {
+            position: fixed; inset: 0; background: white; z-index: 5000;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .close-btn {
+            position: absolute; bottom: 80px; background: black; color: white;
+            padding: 12px 28px; border-radius: 30px; font-size: 12px; font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="privacy-pill">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+            <span>Privacy Secured • No Recording</span>
+        </div>
+    </header>
+
+    <div id="screen-white">
+        <button class="close-btn" onclick="hideGlow()">CLOSE LIGHT</button>
+    </div>
+
+    <main>
+        <section id="view-main" class="view active">
+            <div id="btn-main" class="m3-card" onclick="toggleMain()">
+                <i data-lucide="zap" id="icon-main" class="w-16 h-16 text-primary"></i>
+            </div>
+            <p class="mt-14 text-[11px] font-bold uppercase tracking-[0.4em] opacity-30">Tap to turn on</p>
+        </section>
+
+        <section id="view-blink" class="view">
+            <div id="btn-blink" class="m3-card" onclick="toggleBlink()">
+                <i data-lucide="flame" class="w-16 h-16 text-red-400"></i>
+            </div>
+            <div class="m3-slider">
+                <div id="fill-bar" class="fill"></div>
+                <span id="speed-text" class="hint">Slide to blink</span>
+                <input type="range" id="hz-range" min="0" max="20" value="0">
+            </div>
+            <p class="mt-12 text-[11px] font-bold text-red-300 uppercase tracking-[0.3em]">Emergency Mode</p>
+        </section>
+
+        <section id="view-glow" class="view">
+            <div class="m3-card bg-white" onclick="showGlow()">
+                <i data-lucide="monitor" class="w-16 h-16 text-black"></i>
+            </div>
+            <p class="mt-14 text-[11px] font-bold uppercase tracking-[0.4em] opacity-30">Screen Glow</p>
+        </section>
+    </main>
+
+    <nav>
+        <div class="tab active" onclick="tab(0, 'view-main')">
+            <div class="tab-pill"><i data-lucide="zap" class="w-6 h-6"></i></div>
+            <span class="text-[10px] font-bold">MAIN</span>
+        </div>
+        <div class="tab" onclick="tab(1, 'view-blink')">
+            <div class="tab-pill"><i data-lucide="flame" class="w-6 h-6"></i></div>
+            <span class="text-[10px] font-bold">BLINK</span>
+        </div>
+        <div class="tab" onclick="tab(2, 'view-glow')">
+            <div class="tab-pill"><i data-lucide="monitor" class="w-6 h-6"></i></div>
+            <span class="text-[10px] font-bold">GLOW</span>
+        </div>
+    </nav>
+
+    <script>
+        lucide.createIcons();
+        let track = null, loop = null;
+
+        async function led(on) {
+            try {
+                if (!track) {
+                    const s = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+                    track = s.getVideoTracks()[0];
+                }
+                await track.applyConstraints({advanced:[{torch:on}]});
+            } catch(e) {}
+        }
+
+        function tab(idx, id) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.tab')[idx].classList.add('active');
+            document.getElementById(id).classList.add('active');
+            reset();
+        }
+
+        function reset() {
+            clearInterval(loop); led(false);
+            document.getElementById('btn-main').classList.remove('active-main');
+            document.getElementById('btn-blink').classList.remove('active-blink');
+            document.getElementById('icon-main').style.color = "#D0BCFF";
+            document.getElementById('hz-range').value = 0;
+            document.getElementById('fill-bar').style.width = '0%';
+            document.getElementById('speed-text').innerText = "Slide to blink";
+        }
+
+        function toggleMain() {
+            const on = document.getElementById('btn-main').classList.toggle('active-main');
+            document.getElementById('icon-main').style.color = on ? "#381E72" : "#D0BCFF";
+            led(on);
+        }
+
+        function toggleBlink() {
+            const on = document.getElementById('btn-blink').classList.toggle('active-blink');
+            if(on) { 
+                document.getElementById('hz-range').value = 5; 
+                updateSlider(5);
+                startBlink(5); 
+            } else reset();
+        }
+
+        function updateSlider(v) {
+            document.getElementById('fill-bar').style.width = (v * 5) + '%';
+            document.getElementById('speed-text').innerText = v > 0 ? v + " Hz Blink" : "Slide to blink";
+        }
+
+        document.getElementById('hz-range').oninput = (e) => {
+            const v = e.target.value;
+            updateSlider(v);
+            if(v > 0) { 
+                document.getElementById('btn-blink').classList.add('active-blink'); 
+                startBlink(v); 
+            } else reset();
+        };
+
+        function startBlink(hz) {
+            clearInterval(loop);
+            let s = false;
+            loop = setInterval(() => { s = !s; led(s); }, 1000/(hz*2));
+        }
+
+        function showGlow() { document.getElementById('screen-white').style.display = 'flex'; }
+        function hideGlow() { document.getElementById('screen-white').style.display = 'none'; }
+    </script>
+</body>
+</html>
